@@ -50,16 +50,8 @@ cores = 10
 
 - `nmSurvMed()` runs bandwidth selection, effect estimation, and bootstrap
   inference in a single call.
-- `estimate_cf_hazard()` estimates the counterfactual hazard-increment curve
-  for a joint intervention `(z_a, z_b)`.
-- `estimate_direct_effect()` estimates a time-varying natural direct effect.
-- `estimate_indirect_effect()` estimates a time-varying natural indirect
-  effect.
-- `select_bandwidth()` selects scenario-specific kernel bandwidths by
-  stratified K-fold cross-validation.
-- `bootstrap_nm()` performs an event-stratified bootstrap and returns
-  pointwise percentile confidence intervals. It is normally called
-  automatically by `nmSurvMed()`.
+- `plot_nmSurvMed()` draws the direct and indirect effects on the survival and
+  cumulative-hazard scales in a 2-by-2 figure.
 - `bandwidth_sensitivity()` compares every combination of the minimum,
   optimal, and maximum bandwidths across the three counterfactual scenarios
   using fixed-bandwidth bootstrap intervals.
@@ -178,9 +170,6 @@ For `bandwidth_decision()`:
 
 Complete teaching examples and their data are kept outside the package in the
 repository's top-level `examples/` directory.
-
-Low-level functions use `T1_hat`, `T2_hat`, `D1`, `D2`, and `Z` by default.
-Alternative names can be supplied through their `columns` argument.
 
 With `bandwidth = "paper_recommend"`, the candidate set is
 
