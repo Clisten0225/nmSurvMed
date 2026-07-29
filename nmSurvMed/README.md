@@ -134,6 +134,14 @@ The main outputs are:
 | `fit$diagnostics` | Sample counts, event counts, risk-set checks, and analysis warnings |
 | `fit$runtime` | Elapsed time for bandwidth selection, estimation, bootstrap, and the full analysis |
 
+## Bandwidth sensitivity analysis
+
+> **Computational warning:** This analysis can be extremely time-consuming.
+> It runs a separate bootstrap analysis for every unique combination of the
+> minimum, optimal, and maximum bandwidths across three counterfactual
+> scenarios—up to 27 settings. Consider testing the workflow with a small
+> `bootstrap` value before running the final analysis with 1,000 replicates.
+
 For a fixed-bandwidth bootstrap sensitivity analysis:
 
 ```r
