@@ -2,7 +2,7 @@
 % Please edit documentation in R/sensitivity.R
 \name{bandwidth_decision}
 \alias{bandwidth_decision}
-\title{Report effects robust across all bandwidth settings}
+\title{Classify conclusions across all bandwidth settings}
 \usage{
 bandwidth_decision(x, minimum_points = 1L)
 }
@@ -13,11 +13,22 @@ bandwidth_decision(x, minimum_points = 1L)
 required for a reported interval.}
 }
 \value{
-An object of class \code{nm_bandwidth_decision} with a summary table,
-pointwise decisions, and robust time intervals.
+An object of class \code{nm_bandwidth_decision}. \code{summary} contains one
+row per scale and effect and reports only the consistently significant
+\code{Positive} and \code{Negative} intervals. \code{intervals} retains all four
+conclusions in long format, \code{pointwise} retains the classification at
+every grid point, and \code{definitions} explains all conclusion labels.
 }
 \description{
-A time point is robust when every bandwidth setting has a pointwise
-confidence interval that excludes zero in the same direction. Consecutive
-robust grid points with the same direction are combined into intervals.
+At each time point, confidence intervals from every bandwidth setting are
+classified as follows:
+\describe{
+\item{Positive}{Every confidence interval is strictly above zero.}
+\item{Negative}{Every confidence interval is strictly below zero.}
+\item{Not significant}{Every confidence interval contains zero.}
+\item{Mixed}{The bandwidth settings do not share one of the preceding
+conclusions; for example, some are significant and others are not.}
+}
+Consecutive grid points with the same conclusion are combined into time
+intervals.
 }

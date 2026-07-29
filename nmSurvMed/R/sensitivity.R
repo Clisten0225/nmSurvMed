@@ -294,32 +294,25 @@ print.nm_bandwidth_sensitivity <- function(x, ...) {
   invisible(x)
 }
 
-.combine_robust_intervals <- function(pointwise, minimum_points) {
-  robust <- pointwise$robust
-  if (!any(robust)) {
-    return(data.frame(
-      direction = character(), start_time = numeric(), end_time = numeric(),
-      n_time_points = integer(), stringsAsFactors = FALSE
-    ))
-  }
+.combine_conclusion_intervals <- function(pointwise, minimum_points) {
   run_id <- cumsum(c(
     TRUE,
-    robust[-1L] != robust[-length(robust)] |
-      pointwise$direction[-1L] != pointwise$direction[-nrow(pointwise)]
+    pointwise$conclusion[-1L] !=
+      pointwise$conclusion[-nrow(pointwise)]
   ))
   rows <- split(seq_len(nrow(pointwise)), run_id)
   rows <- Filter(function(index) {
-    all(pointwise$robust[index]) && length(index) >= minimum_points
+    length(index) >= minimum_points
   }, rows)
   if (!length(rows)) {
     return(data.frame(
-      direction = character(), start_time = numeric(), end_time = numeric(),
+      conclusion = character(), start_time = numeric(), end_time = numeric(),
       n_time_points = integer(), stringsAsFactors = FALSE
     ))
   }
   do.call(rbind, lapply(rows, function(index) {
     data.frame(
-      direction = pointwise$direction[index[1L]],
+      conclusion = pointwise$conclusion[index[1L]],
       start_time = pointwise$time[index[1L]],
       end_time = pointwise$time[index[length(index)]],
       n_time_points = length(index),
@@ -328,18 +321,29 @@ print.nm_bandwidth_sensitivity <- function(x, ...) {
   }))
 }
 
-#' Report effects robust across all bandwidth settings
+#' Classify conclusions across all bandwidth settings
 #'
-#' A time point is robust when every bandwidth setting has a pointwise
-#' confidence interval that excludes zero in the same direction. Consecutive
-#' robust grid points with the same direction are combined into intervals.
+#' At each time point, confidence intervals from every bandwidth setting are
+#' classified as follows:
+#' \describe{
+#'   \item{Positive}{Every confidence interval is strictly above zero.}
+#'   \item{Negative}{Every confidence interval is strictly below zero.}
+#'   \item{Not significant}{Every confidence interval contains zero.}
+#'   \item{Mixed}{The bandwidth settings do not share one of the preceding
+#'     conclusions; for example, some are significant and others are not.}
+#' }
+#' Consecutive grid points with the same conclusion are combined into time
+#' intervals.
 #'
 #' @param x An object returned by [bandwidth_sensitivity()].
 #' @param minimum_points Minimum number of consecutive time-grid points
 #'   required for a reported interval.
 #'
-#' @return An object of class `nm_bandwidth_decision` with a summary table,
-#' pointwise decisions, and robust time intervals.
+#' @return An object of class `nm_bandwidth_decision`. `summary` contains one
+#'   row per scale and effect and reports only the consistently significant
+#'   `Positive` and `Negative` intervals. `intervals` retains all four
+#'   conclusions in long format, `pointwise` retains the classification at
+#'   every grid point, and `definitions` explains all conclusion labels.
 #' @export
 bandwidth_decision <- function(x, minimum_points = 1L) {
   if (!inherits(x, "nm_bandwidth_sensitivity")) {
@@ -379,27 +383,32 @@ bandwidth_decision <- function(x, minimum_points = 1L) {
       negative <- rowSums(
         upper < 0 & valid_ci
       ) == length(settings)
-      direction <- ifelse(
+      not_significant <- rowSums(
+        lower <= 0 & upper >= 0 & valid_ci
+      ) == length(settings)
+      conclusion <- ifelse(
         positive, "Positive",
-        ifelse(negative, "Negative", "Not robust")
+        ifelse(
+          negative, "Negative",
+          ifelse(not_significant, "Not significant", "Mixed")
+        )
       )
       key <- paste(scale_name, effect, sep = "_")
       pointwise[[key]] <- data.frame(
         scale = scale_name,
         effect = effect,
         time = by_setting[[1L]]$time,
-        robust = positive | negative,
-        direction = direction,
+        conclusion = conclusion,
         row.names = NULL
       )
-      combined <- .combine_robust_intervals(
+      combined <- .combine_conclusion_intervals(
         pointwise[[key]], minimum_points
       )
       if (nrow(combined)) {
         combined$scale <- scale_name
         combined$effect <- effect
         combined <- combined[
-          c("scale", "effect", "direction", "start_time", "end_time",
+          c("scale", "effect", "conclusion", "start_time", "end_time",
             "n_time_points")
         ]
       }
@@ -412,7 +421,7 @@ bandwidth_decision <- function(x, minimum_points = 1L) {
     do.call(rbind, intervals)
   } else {
     data.frame(
-      scale = character(), effect = character(), direction = character(),
+      scale = character(), effect = character(), conclusion = character(),
       start_time = numeric(), end_time = numeric(),
       n_time_points = integer(), stringsAsFactors = FALSE
     )
@@ -422,34 +431,70 @@ bandwidth_decision <- function(x, minimum_points = 1L) {
   display_scale <- function(value) {
     ifelse(value == "cumulative_hazard", "Cum. hazard", "Survival")
   }
+  display_effect <- function(value) {
+    ifelse(value == "direct", "Direct", "Indirect")
+  }
   pointwise$scale <- display_scale(pointwise$scale)
   intervals$scale <- display_scale(intervals$scale)
+  pointwise$effect <- display_effect(pointwise$effect)
+  intervals$effect <- display_effect(intervals$effect)
 
   combinations <- unique(pointwise[c("scale", "effect")])
-  summary <- do.call(rbind, lapply(seq_len(nrow(combinations)), function(i) {
-    subset_intervals <- intervals[
-      intervals$scale == combinations$scale[i] &
-        intervals$effect == combinations$effect[i], ,
+  conclusion_levels <- c(
+    "Positive", "Negative", "Not significant", "Mixed"
+  )
+  format_intervals <- function(scale_name, effect_name, conclusion_name) {
+    selected <- intervals[
+      intervals$scale == scale_name &
+        intervals$effect == effect_name &
+        intervals$conclusion == conclusion_name, ,
       drop = FALSE
     ]
+    if (!nrow(selected)) {
+      return("None")
+    }
+    format_time <- function(value) {
+      format(round(value, 10L), trim = TRUE, scientific = FALSE)
+    }
+    paste0(
+      "[", vapply(selected$start_time, format_time, character(1L)),
+      ", ", vapply(selected$end_time, format_time, character(1L)), "]",
+      collapse = "; "
+    )
+  }
+  summary <- do.call(rbind, lapply(seq_len(nrow(combinations)), function(i) {
+    values <- vapply(conclusion_levels, function(conclusion_name) {
+      format_intervals(
+        combinations$scale[i],
+        combinations$effect[i],
+        conclusion_name
+      )
+    }, character(1L))
     data.frame(
       scale = combinations$scale[i],
       effect = combinations$effect[i],
-      robust_interval_exists = nrow(subset_intervals) > 0L,
-      number_of_intervals = nrow(subset_intervals),
-      row.names = NULL
+      as.list(values[c("Positive", "Negative")]),
+      row.names = NULL,
+      check.names = FALSE
     )
   }))
+  definitions <- data.frame(
+    conclusion = conclusion_levels,
+    definition = c(
+      "All confidence intervals are above zero.",
+      "All confidence intervals are below zero.",
+      "All confidence intervals contain zero.",
+      "Conclusions differ across bandwidth settings."
+    ),
+    row.names = NULL
+  )
 
   structure(
     list(
       summary = summary,
       intervals = intervals,
       pointwise = pointwise,
-      rule = paste0(
-        "All bandwidth-specific pointwise confidence intervals exclude ",
-        "zero in the same direction."
-      ),
+      definitions = definitions,
       minimum_points = minimum_points
     ),
     class = "nm_bandwidth_decision"
@@ -458,14 +503,14 @@ bandwidth_decision <- function(x, minimum_points = 1L) {
 
 #' @export
 print.nm_bandwidth_decision <- function(x, ...) {
-  cat("Decision across all bandwidth settings\n")
-  cat(x$rule, "\n")
+  cat("Bandwidth decision summary\n")
+  cat("Consistently significant intervals across all bandwidth settings.\n")
+  cat("`None` means no such interval.\n")
   print(x$summary, row.names = FALSE)
-  if (nrow(x$intervals)) {
-    cat("Robust intervals:\n")
-    print(x$intervals, row.names = FALSE)
-  } else {
-    cat("No robust interval was found.\n")
-  }
+  cat(
+    "Not-significant and mixed results remain in `$intervals` and ",
+    "`$pointwise`.\n",
+    sep = ""
+  )
   invisible(x)
 }

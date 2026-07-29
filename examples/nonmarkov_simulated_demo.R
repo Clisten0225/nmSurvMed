@@ -5,10 +5,10 @@ library(nmSurvMed)
 use_parallel <- TRUE
 
 # Used only for parallel computation and must not exceed detectCores().
-n_cores <- 100L
+n_cores <- 10L
 
 demo_data <- read.csv("nonmarkov_simulated_data.csv")
-time <- seq(0, 2.5, by = 0.1)
+time <- seq(0, 2.5, by = 0.01)
 
 # Select bandwidths, estimate direct and indirect effects, and calculate
 # bootstrap confidence intervals.
@@ -63,6 +63,6 @@ plot_bandwidth_sensitivity(
   file = "nonmarkov_simulated_bandwidth_sensitivity.png"
 )
 
-sensitivity_decision <- bandwidth_decision(sensitivity_fit)
-print(sensitivity_decision$summary)
-print(sensitivity_decision$intervals)
+# Report consistently significant positive and negative intervals.
+decision <- bandwidth_decision(sensitivity_fit)
+print(decision$summary)
