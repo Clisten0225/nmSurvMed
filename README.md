@@ -123,13 +123,17 @@ decision$summary
 decision$intervals
 ```
 
-For `bandwidth_decision()`, `Positive` means all bandwidth-specific
-confidence intervals are above zero, `Negative` means all are below zero,
-`Not significant` means all contain zero, and `Mixed` means the conclusions
-differ across bandwidth settings. The compact `summary` reports only the
-consistently significant `Positive` and `Negative` intervals. Complete
-`Not significant` and `Mixed` results remain available in `intervals` and
-`pointwise`.
+For `bandwidth_decision()`:
+
+- `Positive`: all bandwidth-specific confidence intervals are above zero.
+- `Negative`: all bandwidth-specific confidence intervals are below zero.
+- `Not significant`: all bandwidth-specific confidence intervals contain
+  zero.
+- `Mixed`: conclusions differ across bandwidth settings.
+- `summary`: reports only consistently significant `Positive` and `Negative`
+  intervals.
+- `intervals` and `pointwise`: retain the complete `Not significant` and
+  `Mixed` results.
 
 Complete teaching examples and their data are kept outside the package in the
 repository's top-level `examples/` directory.
