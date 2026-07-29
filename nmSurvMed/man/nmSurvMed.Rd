@@ -12,7 +12,7 @@ nmSurvMed(
   D2,
   Z,
   time,
-  bandwidth = "paper_recommand",
+  bandwidth = "paper_recommend",
   exposure = 1,
   reference = 0,
   scale = c("both", "survival", "cumulative_hazard"),
@@ -36,8 +36,8 @@ time, terminal-event indicator, and exposure columns in \code{data}.}
 
 \item{time}{Equally spaced, strictly increasing evaluation grid.}
 
-\item{bandwidth}{Either \code{"paper_recommand"} or a numeric vector of positive
-candidate bandwidths. \code{"paper_recommand"} uses
+\item{bandwidth}{Either \code{"paper_recommend"} or a numeric vector of positive
+candidate bandwidths. \code{"paper_recommend"} uses
 \eqn{\{C m^{-1/K}: C \in \{0.2,0.5,0.7\},
   K \in \{2.5,3,3.5,4,4.5\}\}}, where \eqn{m} is the sample size.}
 
