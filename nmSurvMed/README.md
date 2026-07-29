@@ -117,6 +117,7 @@ Alternative names can be supplied through their `columns` argument.
 
 With `bandwidth = "paper_recommand"`, the candidate set is
 
+```math
 \mathcal{H}
 =
 \left\{
@@ -126,6 +127,7 @@ C \in \{0.2, 0.5, 0.7\},
 \quad
 K \in \{2.5, 3, 3.5, 4, 4.5\}
 \right\}.
+```
 
 where $m$ is the sample size. Selected bandwidths are held fixed during
 bootstrap resampling.
