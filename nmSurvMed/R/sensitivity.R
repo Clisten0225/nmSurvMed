@@ -100,7 +100,7 @@
 #' )
 bandwidth_sensitivity <- function(
     data, T1, D1, T2, D2, Z, time,
-    bandwidth = "paper_recommand",
+    bandwidth = "paper_recommend",
     exposure = 1, reference = 0,
     scale = c("both", "survival", "cumulative_hazard"),
     folds = 5L, bootstrap = 500L, conf_level = 0.95,
