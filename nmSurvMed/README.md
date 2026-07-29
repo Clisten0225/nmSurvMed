@@ -128,6 +128,7 @@ The main outputs are:
 | `fit$effects$survival` | Direct and indirect survival effects, standard errors, and pointwise confidence intervals |
 | `fit$effects$cumulative_hazard` | Direct and indirect cumulative-hazard effects with the same inference summaries |
 | `fit$bandwidth` | Selected scenario-specific bandwidths |
+| `fit$bandwidth_values` | The same selected bandwidths as a full-precision named numeric vector for programmatic use |
 | `fit$bandwidth_scores` | Cross-validation scores for the candidate bandwidths |
 | `fit$data_roles` | Mapping between Exposure, Mediator, Outcome, and the input columns |
 | `fit$diagnostics` | Sample counts, event counts, risk-set checks, and analysis warnings |
