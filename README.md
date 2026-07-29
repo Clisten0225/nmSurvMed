@@ -1,7 +1,10 @@
 # nmSurvMed
 
-`nmSurvMed` implements causal mediation analysis for non-Markov
-illness-death and multi-state survival models.
+`nmSurvMed` provides non-parametric causal mediation analysis for
+illness-death data without requiring the Markov assumption. It is intended
+for researchers studying how a binary exposure affects a terminal event
+directly and indirectly through an intermediate event in multi-state
+survival data.
 
 ## Reference
 
@@ -55,13 +58,30 @@ cores = 10
 - `select_bandwidth()` selects scenario-specific kernel bandwidths by
   stratified K-fold cross-validation.
 - `bootstrap_nm()` performs an event-stratified bootstrap and returns
-  pointwise percentile confidence intervals.
+  pointwise percentile confidence intervals. It is normally called
+  automatically by `nmSurvMed()`.
 - `bandwidth_sensitivity()` compares every combination of the minimum,
   optimal, and maximum bandwidths across the three counterfactual scenarios
   using fixed-bandwidth bootstrap intervals.
 - `plot_bandwidth_sensitivity()` draws the four sensitivity effect panels.
 - `bandwidth_decision()` classifies each time interval as `Positive`,
   `Negative`, `Not significant`, or `Mixed` across all bandwidth settings.
+
+## Data format
+
+The input must be a data frame with one row per participant. Column names are
+specified in the function call and do not need to match the example names.
+
+| Argument | Example column | Meaning |
+|---|---|---|
+| `T1` | `T1_hat` | Observed time of the intermediate event or its censoring time |
+| `D1` | `D1` | Intermediate-event indicator: 1 = observed, 0 = censored |
+| `T2` | `T2_hat` | Observed terminal-event or follow-up time |
+| `D2` | `D2` | Terminal-event indicator: 1 = observed, 0 = censored |
+| `Z` | `Z` | Binary exposure or treatment indicator |
+
+The event indicators must contain only 0 and 1, times must be finite and
+non-negative, and `T1` should not exceed `T2`.
 
 ## Minimal workflow
 
@@ -79,7 +99,7 @@ fit <- nmSurvMed(
   D2 = "D2",
   Z = "Z",
   time = time,
-  bandwidth = "paper_recommand",
+  bandwidth = "paper_recommend",
   folds = 5,
   bootstrap = 1000L,
   parallel = TRUE,
@@ -101,6 +121,18 @@ plot_nmSurvMed(
 )
 ```
 
+The main outputs are:
+
+| Output | Contents |
+|---|---|
+| `fit$effects$survival` | Direct and indirect survival effects, standard errors, and pointwise confidence intervals |
+| `fit$effects$cumulative_hazard` | Direct and indirect cumulative-hazard effects with the same inference summaries |
+| `fit$bandwidth` | Selected scenario-specific bandwidths |
+| `fit$bandwidth_scores` | Cross-validation scores for the candidate bandwidths |
+| `fit$data_roles` | Mapping between Exposure, Mediator, Outcome, and the input columns |
+| `fit$diagnostics` | Sample counts, event counts, risk-set checks, and analysis warnings |
+| `fit$runtime` | Elapsed time for bandwidth selection, estimation, bootstrap, and the full analysis |
+
 For a fixed-bandwidth bootstrap sensitivity analysis:
 
 ```r
@@ -109,7 +141,7 @@ sensitivity_fit <- bandwidth_sensitivity(
   T1 = "T1_hat", D1 = "D1",
   T2 = "T2_hat", D2 = "D2", Z = "Z",
   time = time,
-  bandwidth = "paper_recommand",
+  bandwidth = "paper_recommend",
   folds = 5,
   bootstrap = 1000L,
   parallel = TRUE,
@@ -141,7 +173,7 @@ repository's top-level `examples/` directory.
 Low-level functions use `T1_hat`, `T2_hat`, `D1`, `D2`, and `Z` by default.
 Alternative names can be supplied through their `columns` argument.
 
-With `bandwidth = "paper_recommand"`, the candidate set is
+With `bandwidth = "paper_recommend"`, the candidate set is
 
 ```math
 \mathcal{H}
