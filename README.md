@@ -18,7 +18,7 @@ number of logical cores:
 
 ```r
 parallel = TRUE
-cores = 4
+cores = 10
 ```
 
 ## Main functions
@@ -38,8 +38,8 @@ cores = 4
   optimal, and maximum bandwidths across the three counterfactual scenarios
   using fixed-bandwidth bootstrap intervals.
 - `plot_bandwidth_sensitivity()` draws the four sensitivity effect panels.
-- `bandwidth_decision()` reports time intervals where every bandwidth-specific
-  confidence interval excludes zero in the same direction.
+- `bandwidth_decision()` classifies each time interval as `Positive`,
+  `Negative`, `Not significant`, or `Mixed` across all bandwidth settings.
 
 ## Minimal workflow
 
@@ -47,7 +47,7 @@ cores = 4
 library(nmSurvMed)
 
 data <- read.csv("../examples/nonmarkov_simulated_data.csv")
-time <- seq(0, 2.5, by = 0.1)
+time <- seq(0, 2.5, by = 0.01)
 
 fit <- nmSurvMed(
   data,
@@ -61,7 +61,7 @@ fit <- nmSurvMed(
   folds = 5,
   bootstrap = 1000L,
   parallel = TRUE,
-  cores = 4L,
+  cores = 10L,
   seed = 123
 )
 
@@ -91,13 +91,23 @@ sensitivity_fit <- bandwidth_sensitivity(
   folds = 5,
   bootstrap = 1000L,
   parallel = TRUE,
-  cores = 4L,
+  cores = 10L,
   seed = 123
 )
 
 plot_bandwidth_sensitivity(sensitivity_fit)
-bandwidth_decision(sensitivity_fit)
+decision <- bandwidth_decision(sensitivity_fit)
+decision$summary
+decision$intervals
 ```
+
+For `bandwidth_decision()`, `Positive` means all bandwidth-specific
+confidence intervals are above zero, `Negative` means all are below zero,
+`Not significant` means all contain zero, and `Mixed` means the conclusions
+differ across bandwidth settings. The compact `summary` reports only the
+consistently significant `Positive` and `Negative` intervals. Complete
+`Not significant` and `Mixed` results remain available in `intervals` and
+`pointwise`.
 
 Complete teaching examples and their data are kept outside the package in the
 repository's top-level `examples/` directory.
@@ -105,7 +115,19 @@ repository's top-level `examples/` directory.
 Low-level functions use `T1_hat`, `T2_hat`, `D1`, `D2`, and `Z` by default.
 Alternative names can be supplied through their `columns` argument.
 
-With `bandwidth = "paper_recommand"`, the candidates are
-`C * m^(-1 / K)` for `C` in `c(0.2, 0.5, 0.7)` and `K` in
-`c(2.5, 3, 3.5, 4, 4.5)`, where `m` is the sample size. Selected bandwidths
-are held fixed during bootstrap resampling.
+With `bandwidth = "paper_recommand"`, the candidate set is
+
+```math
+\mathcal{H}
+=
+\left\{
+C m^{-1/K}
+:
+C \in \{0.2, 0.5, 0.7\},
+\quad
+K \in \{2.5, 3, 3.5, 4, 4.5\}
+\right\}.
+```
+
+where $m$ is the sample size. Selected bandwidths are held fixed during
+bootstrap resampling.
