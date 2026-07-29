@@ -77,7 +77,7 @@
   }
   if (is.character(bandwidth)) {
     if (length(bandwidth) != 1L ||
-        !bandwidth %in% c("paper_recommend", "paper_recommand", "paper")) {
+        bandwidth != "paper_recommend") {
       stop(
         paste0(
           "Character `bandwidth` must be exactly ",
@@ -85,16 +85,6 @@
         ),
         call. = FALSE
       )
-    }
-    if (bandwidth %in% c("paper_recommand", "paper")) {
-      warning(
-        paste0(
-          "`bandwidth = \"", bandwidth, "\"` is deprecated; use ",
-          "`bandwidth = \"paper_recommend\"`."
-        ),
-        call. = FALSE
-      )
-      bandwidth <- "paper_recommend"
     }
   } else {
     bandwidth <- as.numeric(bandwidth)
