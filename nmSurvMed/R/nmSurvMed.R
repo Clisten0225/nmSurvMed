@@ -77,24 +77,24 @@
   }
   if (is.character(bandwidth)) {
     if (length(bandwidth) != 1L ||
-        !bandwidth %in% c("paper_recommand", "paper")) {
+        !bandwidth %in% c("paper_recommend", "paper_recommand", "paper")) {
       stop(
         paste0(
           "Character `bandwidth` must be exactly ",
-          "\"paper_recommand\"."
+          "\"paper_recommend\"."
         ),
         call. = FALSE
       )
     }
-    if (bandwidth == "paper") {
+    if (bandwidth %in% c("paper_recommand", "paper")) {
       warning(
         paste0(
-          "`bandwidth = \"paper\"` is deprecated; use ",
-          "`bandwidth = \"paper_recommand\"`."
+          "`bandwidth = \"", bandwidth, "\"` is deprecated; use ",
+          "`bandwidth = \"paper_recommend\"`."
         ),
         call. = FALSE
       )
-      bandwidth <- "paper_recommand"
+      bandwidth <- "paper_recommend"
     }
   } else {
     bandwidth <- as.numeric(bandwidth)
@@ -160,8 +160,8 @@
 #'   intermediate-event time, intermediate-event indicator, terminal-event
 #'   time, terminal-event indicator, and exposure columns in `data`.
 #' @param time Equally spaced, strictly increasing evaluation grid.
-#' @param bandwidth Either `"paper_recommand"` or a numeric vector of positive
-#'   candidate bandwidths. `"paper_recommand"` uses
+#' @param bandwidth Either `"paper_recommend"` or a numeric vector of positive
+#'   candidate bandwidths. `"paper_recommend"` uses
 #'   \eqn{\{C m^{-1/K}: C \in \{0.2,0.5,0.7\},
 #'   K \in \{2.5,3,3.5,4,4.5\}\}}, where \eqn{m} is the sample size.
 #' @param exposure Exposure level of interest.
@@ -223,7 +223,7 @@
 #'   parallel = FALSE, seed = 1
 #' )
 nmSurvMed <- function(data, T1, D1, T2, D2, Z, time,
-                      bandwidth = "paper_recommand",
+                      bandwidth = "paper_recommend",
                       exposure = 1, reference = 0,
                       scale = c("both", "survival", "cumulative_hazard"),
                       folds = 5L, bootstrap = 500L, conf_level = 0.95,
@@ -465,7 +465,7 @@ nmSurvMed <- function(data, T1, D1, T2, D2, Z, time,
         seed = seed,
         keep_bootstrap = keep_bootstrap,
         bandwidth_rule = if (is.character(bandwidth)) {
-          "paper_recommand"
+          "paper_recommend"
         } else {
           "user"
         }
