@@ -1,0 +1,24 @@
+citHeader("To cite nmSurvMed in publications, please use:")
+
+citEntry(
+  entry = "Article",
+  title = paste(
+    "Non-Parametric Mediation Analysis of Non-Markov",
+    "Illness-Death Model"
+  ),
+  author = personList(
+    as.person("Li-Sheng Zhuang"),
+    as.person("Jih-Chang Yu"),
+    as.person("Yen-Tsung Huang")
+  ),
+  journal = "Statistics in Medicine",
+  year = "2026",
+  doi = "10.1002/sim.70685",
+  url = "https://doi.org/10.1002/sim.70685",
+  note = "Accepted for publication",
+  textVersion = paste(
+    "Zhuang, L.-S., Yu, J.-C., and Huang, Y.-T. (2026).",
+    "Non-Parametric Mediation Analysis of Non-Markov Illness-Death Model.",
+    "Statistics in Medicine. doi:10.1002/sim.70685."
+  )
+)

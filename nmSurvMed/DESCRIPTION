@@ -1,0 +1,24 @@
+Package: nmSurvMed
+Type: Package
+Title: Causal Mediation Analysis for Non-Markov Multi-State Survival Models
+Version: 0.0.1
+Authors@R: person(
+    given = "Li-Sheng",
+    family = "Zhuang",
+    role = c("aut", "cre"),
+    email = "yspstcc100060507@gmail.com"
+  )
+Description: Estimates counterfactual hazards and time-varying direct and
+    indirect effects in illness-death models without imposing a Markov
+    assumption. Kernel-smoothed estimation, stratified cross-validation for
+    bandwidth selection, and stratified bootstrap inference are provided.
+    The methods are described in Zhuang, Yu, and Huang (2026)
+    <doi:10.1002/sim.70685>, accepted for publication in Statistics in
+    Medicine.
+License: GPL (>= 3)
+Encoding: UTF-8
+URL: https://doi.org/10.1002/sim.70685
+SystemRequirements: Parallel execution uses forked processes on Linux and
+    macOS and PSOCK workers on Windows.
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
