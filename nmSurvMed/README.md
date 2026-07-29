@@ -10,6 +10,28 @@ Li-Sheng Zhuang, Jih-Chang Yu, and Yen-Tsung Huang (2026).
 Accepted for publication in *Statistics in Medicine*.
 [doi:10.1002/sim.70685](https://doi.org/10.1002/sim.70685).
 
+## Installation
+
+Install the package directly from GitHub:
+
+```r
+install.packages("remotes")
+remotes::install_github(
+  "Clisten0225/nmSurvMed",
+  subdir = "nmSurvMed"
+)
+```
+
+Then load the package:
+
+```r
+library(nmSurvMed)
+```
+
+The package dependencies are installed automatically. The
+`install.packages("remotes")` command only needs to be run if `remotes` is not
+already installed.
+
 ## Platform support
 
 Parallel execution is cross-platform. Linux and macOS use forked processes;
